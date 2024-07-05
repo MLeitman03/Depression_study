@@ -1,7 +1,6 @@
 #%%
 #Import libraries
 import pandas as pd
-import numpy as np
 
 #%%
 #Upload data
@@ -18,5 +17,6 @@ asv = asv.iloc[:,11:]
 asv = asv.drop(columns=['All Samples'])
 
 #%%
-#Export file
-asv.to_csv('/Users/madelaineleitman/Downloads/DongLab/Depression/cleaned_ASV_depression.csv')
+# Save the modified DataFrame to a text file
+output_file_path = '/Users/madelaineleitman/Downloads/DongLab/Depression/cleaned_ASV_depression.txt'
+asv.to_csv(output_file_path, sep='\t', index=False)
