@@ -2,19 +2,20 @@ library(ggplot2)
 library(plyr)
 library(agricolae)
 setwd('/Users/madelaineleitman/Downloads/DongLab/Depression/chao1_alpha_diversity/')
+
 data_box_plot<-read.table('alpha-diversity.tsv',sep ='\t', header = TRUE)
 
 mapping <- read.csv2('/Users/madelaineleitman/Downloads/DongLab/Depression/mapping_depression.csv', sep = ',', header = TRUE)
 
 mapping <- cbind(mapping$Sample.ID, mapping$Cohort)
 
+colnames(mapping) <- c('Sample', 'Group')
+colnames(data_box_plot)[1] <- ('Sample')
 
-combined <- merge(data_box_plot, mapping, by.x = "X", by.y = "V1")
 
-combined$V2<-factor(combined$V2, levels =c("WT","SERT KO"))
+combined <- merge(data_box_plot, mapping, by = "Sample")
 
-names(combined)[names(combined) == "V2"] <- "Group"
-names(combined)[names(combined) == "X"] <- "Sample"
+combined$Group<-factor(combined$Group, levels =c("WT","SERT KO"))
 
 p<-ggplot(combined, aes(y=chao1, x=Group, color=Group))
 
