@@ -8,13 +8,12 @@ mapping <- read.csv2('/Users/madelaineleitman/Downloads/DongLab/Depression/mappi
 
 mapping <- cbind(mapping$Sample.ID, mapping$Cohort)
 
-names(mapping)[names(mapping) == "V2"] <- "Sample"
+colnames(mapping) <- c('Sample', 'Group')
+colnames(data_box_plot)[1] <- ('Sample')
 
-combined <- merge(data_box_plot, mapping, by.x = "Sample", by.y = "V1")
+combined <- merge(data_box_plot, mapping, by= "Sample")
 
-combined$V2<-factor(combined$V2, levels =c("WT","SERT KO"))
-
-names(combined)[names(combined) == "V2"] <- "Group"
+combined$Group<-factor(combined$Group, levels =c("WT","SERT KO"))
 
 p<-ggplot(combined, aes(y=shannon_entropy, x=Group, color=Group))
 
