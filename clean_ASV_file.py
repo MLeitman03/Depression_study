@@ -13,6 +13,9 @@ map_to_id = pd.read_excel('/Users/madelaineleitman/Downloads/DongLab/Depression/
 asv['ASV'] = ['ASV' + str(i + 1) for i in range(len(asv))]
 
 #%%
+asv_mapping = asv.iloc[:,0:12]
+
+#%%
 #Choose columns
 asv = asv.iloc[:,11:]
 asv = asv.drop(columns=['All Samples'])
@@ -56,6 +59,9 @@ for col in asv.columns:
         asv.rename(columns={col: id_to_sample[col]}, inplace=True)
 
 #%%
+asv.rename(columns = {'ASV': 'OTU ID'}, inplace=True)
+
+#%%
 # Save the modified DataFrame to a text file
 output_file_path = '/Users/madelaineleitman/Downloads/DongLab/Depression/cleaned_ASV_depression.txt'
 asv.to_csv(output_file_path, sep='\t', index=False)
@@ -64,3 +70,8 @@ asv.to_csv(output_file_path, sep='\t', index=False)
 #Save mapping file
 output_file_path = '/Users/madelaineleitman/Downloads/DongLab/Depression/mapping_depression.csv'
 map_to_group.to_csv(output_file_path)
+
+#%%
+#Save ASV to taxa file
+output_file_path = '/Users/madelaineleitman/Downloads/DongLab/Depression/asv_mapping_depression.csv'
+asv_mapping.to_csv(output_file_path)
