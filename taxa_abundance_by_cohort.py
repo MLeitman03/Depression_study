@@ -1,6 +1,8 @@
 # %%
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.stats import ttest_ind
 
 # %%
 # File paths and labels
@@ -12,12 +14,14 @@ files = {
     'level-6': '/Users/madelaineleitman/Downloads/DongLab/Depression/level-6_taxa_abundance_depression_001.csv'
 }
 
-# Loop through each file and create the plot
+
+palette = {'SERT KO': 'skyblue', 'WT': 'salmon'}
+
+
 for level, filepath in files.items():
-    # Read the CSV file
+
     df = pd.read_csv(filepath)
 
-    # Set the index
     df.set_index('index', inplace=True)
 
     # Select columns that start with 'k__'
@@ -29,17 +33,14 @@ for level, filepath in files.items():
 
     # Calculate the relative abundance
     df_relative = df_clean.div(row_sums, axis=0)
-
-    # Join the 'Cohort' column back
     df_relative = df_relative.join(df['Cohort'])
 
     # Group by 'Cohort' and calculate the mean relative abundance for each taxon
     cohort_means = df_relative.groupby('Cohort').mean()
 
-    # Plotting
-    ax = cohort_means.plot(kind='bar', stacked=True, figsize=(13, 7), colormap='tab20')
+    plt.figure(figsize=(13, 7))
+    ax = cohort_means.plot(kind='bar', stacked=True, figsize=(13, 7), cmap='Dark2')
 
-    # Customize the plot
     ax.set_xlabel('Cohort')
     ax.set_ylabel('Average Relative Abundance')
     ax.set_title(f'Average Relative Abundance by Cohort ({level})')
@@ -48,8 +49,33 @@ for level, filepath in files.items():
     plt.legend(title='Taxa', bbox_to_anchor=(1.05, 1), loc='upper left')  # Place legend outside of plot
     plt.tight_layout()  # Adjust layout to make room for legend
 
-    # Save the plot
     plt.savefig(f'/Users/madelaineleitman/Downloads/DongLab/Depression/outputs/{level}_average_abundance.png')
-
-    # Clear the figure for the next plot
     plt.clf()
+
+    # Perform t-tests
+    results = {'Taxa': [], 'p-value': [], 'mean_SERT_KO': [], 'mean_WT': []}
+
+    for col in k_cols:
+        group1 = df[df['Cohort'] == 'SERT KO'][col]
+        group2 = df[df['Cohort'] == 'WT'][col]
+
+        t_stat, p_val = ttest_ind(group1, group2, nan_policy='omit')
+
+        results['Taxa'].append(col)
+        results['p-value'].append(p_val)
+        results['mean_SERT_KO'].append(group1.mean())
+        results['mean_WT'].append(group2.mean())
+
+        plt.figure(figsize=(10, 6))
+        sns.boxplot(x='Cohort', y=col, data=df, palette=palette)
+        sns.stripplot(x='Cohort', y=col, data=df, jitter=True, color='black', alpha=0.5)
+        plt.title(f'Comparison of {col} by Cohort ({level})')
+        plt.ylabel('Relative Abundance')
+        plt.xlabel('Cohort')
+        plt.tight_layout()
+        plt.savefig(f'/Users/madelaineleitman/Downloads/DongLab/Depression/outputs/{level}_{col}_jitter_plot.png')
+        plt.clf()
+
+    results_df = pd.DataFrame(results)
+
+    results_df.to_csv(f'/Users/madelaineleitman/Downloads/DongLab/Depression/outputs/{level}_t_test_results.csv', index=False)
